@@ -1,0 +1,58 @@
+{
+  "entities": {
+    "RealityCheck": {
+      "title": "Reality Check",
+      "description": "A saved space scale calculation (formerly room section).",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "The UID of the user who created this check." },
+        "width": { "type": "number", "description": "Space width in meters." },
+        "depth": { "type": "number", "description": "Space depth in meters." },
+        "height": { "type": "number", "description": "Space height in meters." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the check was saved." }
+      },
+      "required": ["userId", "width", "depth", "height", "createdAt"]
+    },
+    "StudioSave": {
+      "title": "Studio Save",
+      "description": "A saved modular Studio layout preset.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "The UID of the user who created this layout." },
+        "name": { "type": "string", "description": "User assigned label for layout." },
+        "width": { "type": "number" },
+        "depth": { "type": "number" },
+        "height": { "type": "number" },
+        "roomType": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "name", "width", "depth", "height", "roomType", "createdAt"]
+    },
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Information about the registered user.",
+      "type": "object",
+      "properties": {
+        "displayName": { "type": "string" },
+        "email": { "type": "string" },
+        "lastActive": { "type": "string", "format": "date-time" },
+        "profileIcon": { "type": "string" }
+      },
+      "required": ["email", "displayName", "lastActive"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profile documents with active tracks."
+    },
+    "reality_checks/{checkId}": {
+      "schema": "RealityCheck",
+      "description": "Collection of saved space scale reality checks."
+    },
+    "studio_saves/{saveId}": {
+      "schema": "StudioSave",
+      "description": "Collection of saved studio designs."
+    }
+  }
+}

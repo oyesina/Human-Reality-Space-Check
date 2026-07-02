@@ -1,0 +1,97 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helpers ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.email == 'oyesinaoyerinde@gmail.com';
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // --- Entity Validations ---
+
+    function isValidRealityCheck(data) {
+      return data.keys().hasAll(['userId', 'width', 'depth', 'height', 'createdAt']) &&
+             data.keys().size() == 5 &&
+             data.userId == request.auth.uid &&
+             data.width is number && data.width > 0 && data.width <= 100 &&
+             data.depth is number && data.depth > 0 && data.depth <= 100 &&
+             data.height is number && data.height > 0 && data.height <= 100 &&
+             data.createdAt == request.time;
+    }
+
+    function isValidStudioSave(data) {
+      return data.keys().hasAll(['userId', 'width', 'depth', 'height', 'roomType', 'name', 'createdAt']) &&
+             data.keys().size() == 7 &&
+             data.userId == request.auth.uid &&
+             data.width is number && data.width > 0 && data.width <= 100 &&
+             data.depth is number && data.depth > 0 && data.depth <= 100 &&
+             data.height is number && data.height > 0 && data.height <= 100 &&
+             data.roomType is string &&
+             data.name is string &&
+             data.createdAt == request.time;
+    }
+
+    function isValidUserProfile(data) {
+      return data.keys().hasAll(['email', 'displayName', 'lastActive']) &&
+             (data.keys().size() == 3 || (data.keys().size() == 4 && data.keys().hasAll(['profileIcon']))) &&
+             data.email is string && data.email.size() <= 256 &&
+             (!data.keys().hasAll(['profileIcon']) || (data.profileIcon is string && data.profileIcon.size() <= 64));
+    }
+
+    // --- Collections ---
+
+    match /users/{userId} {
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin();
+      allow create, update: if isOwner(userId) && isValidUserProfile(incoming());
+    }
+
+    match /reality_checks/{checkId} {
+      allow list: if (isSignedIn() && resource.data.userId == request.auth.uid) || isAdmin();
+      allow get: if (isSignedIn() && resource.data.userId == request.auth.uid) || isAdmin();
+      
+      allow create: if isSignedIn() && 
+                    isValidId(checkId) && 
+                    isValidRealityCheck(incoming());
+      
+      allow delete: if (isSignedIn() && existing().userId == request.auth.uid) || isAdmin();
+      allow update: if false;
+    }
+
+    match /studio_saves/{saveId} {
+      allow list: if (isSignedIn() && resource.data.userId == request.auth.uid) || isAdmin();
+      allow get: if (isSignedIn() && resource.data.userId == request.auth.uid) || isAdmin();
+      
+      allow create: if isSignedIn() && 
+                    isValidId(saveId) && 
+                    isValidStudioSave(incoming());
+      
+      allow delete: if (isSignedIn() && existing().userId == request.auth.uid) || isAdmin();
+      allow update: if false;
+    }
+  }
+}
