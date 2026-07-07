@@ -249,8 +249,8 @@ export default function LandingPage() {
               ★ Active Edition 2.1 — Built for Builders
             </span>
             <h1 className="text-5xl sm:text-6xl font-extralight uppercase leading-[0.9] tracking-tighter text-black">
-              Visualize room dimensions <br />
-              <span className="font-bold">relative to the human body</span>
+              PROPORTION ROOM VOLUMES <br />
+              <span className="font-bold">& ESTIMATE MATERIAL QUANTITIES</span>
             </h1>
             <p className="text-lg text-studio-gray leading-snug mt-2 font-serif italic">
               "Before you pour the concrete slab or frame the timber rafters, execute a real-time volumetric reality check."
